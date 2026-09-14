@@ -1,0 +1,22 @@
+[project]
+name = "orders-summary"
+version = "0.1.0"
+description = "Demo Databricks Job showing the local-execution value of databricks-local-ci"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+orders-summary = "orders_summary.main:main"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8,<10",
+    "databricks-local-ci @ git+https://github.com/ViniciusOtoni/databricks-local-ci.git@master",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

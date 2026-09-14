@@ -1,0 +1,24 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    uses: ViniciusOtoni/databricks-local-ci/.github/workflows/databricks-ci.yml@master
+    with:
+      dbr_version: "15.4-LTS"
+      package_dir: "."
+
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    uses: ViniciusOtoni/databricks-local-ci/.github/workflows/databricks-cd.yml@master
+    with:
+      package_dir: "."
+      bundle_target: "dev"
+    secrets:
+      databricks_host: ${{ secrets.DATABRICKS_HOST }}
+      databricks_client_id: ${{ secrets.DATABRICKS_CLIENT_ID }}

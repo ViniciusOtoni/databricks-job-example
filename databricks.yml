@@ -1,0 +1,32 @@
+bundle:
+  name: databricks-job-example
+
+variables:
+  catalog:
+    default: main
+  schema:
+    default: default
+
+resources:
+  jobs:
+    orders_summary_job:
+      name: orders-summary-job
+      tasks:
+        - task_key: run_orders_summary
+          python_wheel_task:
+            package_name: orders_summary
+            entry_point: orders-summary
+            parameters:
+              - "--input-path"
+              - "/Volumes/${var.catalog}/${var.schema}/demo/orders"
+              - "--output-path"
+              - "/Volumes/${var.catalog}/${var.schema}/demo/orders_summary"
+          libraries:
+            - whl: ./dist/*.whl
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: https://dbc-706f8d04-6ed5.cloud.databricks.com
