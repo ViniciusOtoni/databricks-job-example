@@ -15,6 +15,9 @@ jobs:
   deploy:
     needs: test
     if: github.ref == 'refs/heads/main'
+    permissions:
+      id-token: write
+      contents: read
     uses: ViniciusOtoni/databricks-local-ci/.github/workflows/databricks-cd.yml@master
     with:
       package_dir: "."
