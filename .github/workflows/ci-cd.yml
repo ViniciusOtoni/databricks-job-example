@@ -22,6 +22,7 @@ jobs:
     with:
       package_dir: "."
       bundle_target: "dev"
+      auth_method: "pat"
     secrets:
       databricks_host: ${{ secrets.DATABRICKS_HOST }}
-      databricks_client_id: ${{ secrets.DATABRICKS_CLIENT_ID }}
+      databricks_token: ${{ secrets.DATABRICKS_TOKEN }}

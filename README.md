@@ -63,15 +63,24 @@ docker run --rm -v "$(pwd):/workspace/project" -w /workspace/project \
 ## Deploying for real
 
 `databricks.yml` targets a real workspace
-(`https://dbc-706f8d04-6ed5.cloud.databricks.com`), authenticated via GitHub
-OIDC to a Service Principal (`DATABRICKS_CLIENT_ID` secret). Two things have
-to be true before `deploy` actually succeeds, neither of which this repo or
-its workflow can do for you:
+(`https://dbc-706f8d04-6ed5.cloud.databricks.com`) — a **Free Edition**
+workspace, which has no account console and so cannot use Service
+Principal/OIDC federation at all (confirmed: `databricks bundle deploy` with
+`DATABRICKS_AUTH_TYPE=github-oidc` fails with `TOKEN_INVALID` no matter how a
+federation policy is configured, because Free Edition can't create one).
+`ci-cd.yml` therefore authenticates with `auth_method: "pat"` — a personal
+access token — instead of OIDC.
 
-1. That Service Principal needs a GitHub Actions federation policy on the
-   Databricks side, trusting this repo's OIDC issuer/subject — see
-   [`databricks-local-ci`'s README](https://github.com/ViniciusOtoni/databricks-local-ci#known-limitations-read-before-adopting)
-   for what `databricks-cd.yml` expects.
+Two things have to be true before `deploy` actually succeeds, neither of
+which this repo or its workflow can do for you:
+
+1. Generate a personal access token from **workspace** Settings → Developer →
+   Access tokens (not the account console — Free Edition doesn't have one),
+   and set it as this repo's `DATABRICKS_TOKEN` secret:
+   `gh secret set DATABRICKS_TOKEN --body "<token>"`. See
+   [`databricks-local-ci`'s README](https://github.com/ViniciusOtoni/databricks-local-ci#consuming-the-workflows)
+   for the `oidc` vs `pat` trade-off if you're deploying to a workspace that
+   *does* have account console access.
 2. `/Volumes/main/default/demo/orders` (the `--input-path` the bundle passes)
    needs to actually exist and have `region`/`amount` columns — this repo
    ships the job definition, not sample production data. Adjust the
