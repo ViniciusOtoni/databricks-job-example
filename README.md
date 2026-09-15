@@ -20,17 +20,20 @@ real pass/fail answer locally, in this repo's own CI, before any cluster is
 ever involved:
 
 ```
-tests/test_integration.py::test_orders_summary_real_run_writes_expected_summary PASSED
 tests/test_transform.py::test_summarize_orders_by_region PASSED
-2 passed in 79.46s
+::auto_real_run.py::test_databricks_local_ci_auto_real_run PASSED
+2 passed in 43.51s
 ```
 
-That's the full local test suite — including two separate Spark session
-startups (the test fixture's, and the one the job's own subprocess creates) —
-measured end to end in this repo's own Docker-based verification, not a
-cherry-picked number. No cluster, no waiting, no DBU spent, and it's the exact
-artifact (built with `uv`, installed as a real wheel, run as a real subprocess)
-that would otherwise ship straight to the job cluster.
+That second test isn't hand-written anywhere in this repo — it's generated
+automatically by `databricks-local-ci`'s pytest plugin from the
+`[tool.databricks-local-ci]` block in `pyproject.toml`. No
+`test_integration.py`, no manual subprocess wiring: declare your entry point
+and a bit of sample data, and the plugin builds the input Delta table, runs
+the real packaged wheel as a real subprocess, and checks it wrote real output.
+No cluster, no waiting, no DBU spent, and it's the exact artifact (built with
+`uv`, installed as a real wheel, run as a real subprocess) that would
+otherwise ship straight to the job cluster.
 
 ## What's here
 
@@ -39,10 +42,10 @@ that would otherwise ship straight to the job cluster.
 - `src/orders_summary/main.py` — the CLI entry point
   (`python -m orders_summary.main --input-path ... --output-path ...`), the
   same one the Databricks Job task below invokes in production.
-- `tests/test_integration.py` — the "real run": writes a local Delta table,
-  invokes `main.py` as a genuine subprocess via
-  `databricks_local_ci.subprocess_runner.run_entrypoint`, reads back what it
-  wrote, and asserts on it.
+- `pyproject.toml`'s `[tool.databricks-local-ci]` block — declares the entry
+  point and sample input `databricks-local-ci` needs to run the job for real
+  in CI; see `databricks-local-ci`'s README for the schema. This is the whole
+  "real run" test — there's no `tests/test_integration.py` in this repo.
 - `databricks.yml` — a Databricks Asset Bundle deploying this wheel as a
   `python_wheel_task` job.
 - `.github/workflows/ci-cd.yml` — calls `databricks-local-ci`'s two reusable

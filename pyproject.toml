@@ -20,3 +20,14 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.databricks-local-ci]
+entry_point = "orders_summary.main"
+
+[tool.databricks-local-ci.sample_input]
+columns = ["region", "amount"]
+rows = [
+    ["us-east", 100.0],
+    ["us-east", 50.0],
+    ["eu-west", 200.0],
+]
